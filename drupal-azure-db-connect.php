@@ -14,15 +14,6 @@ $conn_string = getenv('MYSQLCONNSTR_DefaultConnection');
 // - cleardb-ca.pem.php
 // Note that for security reasons we renamed all certificates to *.php.
 
-$databases['default']['default'] = array(
-  'driver' => 'mysql',
-  'database' => '',
-  'username' => '',
-  'password' => '',
-  'host' => '',
-  'prefix' => '',
-);
-
 // Use this for testing.
 // $conn_string = 'Database=my-database-name;Data Source=eu-db-host-azure-west-a.cloudapp.net;User Id=521agff-my-user-id;Password=5KA%a--gqes3';
 
@@ -33,12 +24,17 @@ $patterns = array(
   'password'  => 'Password=(.+)$',
   'database'  => 'Database=(.+?);',
 );
+$db_settings = array();
 foreach ($patterns as $key => $pattern) {
   $matches = array();
   preg_match("/$pattern/", $conn_string, $matches);
   if (isset($matches[1])) {
-    $databases['default']['default'][$key] = $matches[1];
+    $db_settings[$key] = $matches[1];
   }
+}
+
+if (count($db_settings) == 4) {
+  $databases['default']['default'] = $db_settings;
 }
 
 // Check if certs & keys exists so that we can connect to cleardb via SSL.
@@ -54,7 +50,7 @@ foreach($db_ssl_conf as $key => $filename) {
   }
 }
 
-if ($use_ssl) {
+if (isset($databases) && $use_ssl) {
   $databases['default']['default']['driver options'] = array(
     PDO::MYSQL_ATTR_SSL_KEY   => $db_ssl_conf['key'],
     PDO::MYSQL_ATTR_SSL_CERT  => $db_ssl_conf['cert'],
