@@ -61,5 +61,3 @@ if ($use_ssl) {
     PDO::MYSQL_ATTR_SSL_CA    => $db_ssl_conf['ca-cert'],
   );
 }
-
-print_r($databases);
